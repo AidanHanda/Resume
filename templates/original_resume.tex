@@ -1,0 +1,190 @@
+\documentclass[10pt]{article}
+
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage[margin=.5in]{geometry}
+\usepackage{bold-extra}
+\usepackage{enumitem}% http://ctan.org/pkg/enumitem
+\usepackage{multicol} % in the preamble
+\usepackage{tabularx}
+\usepackage{array}
+\setlist[itemize]{topsep=0pt,itemsep=0pt,parsep=0pt,partopsep=0pt}
+
+% =================================
+% Formatting various headings 
+% and their spacings
+% =================================
+\titleformat{\section}
+            {\Large\scshape} % Formatting of the text
+            {}  % Before the text
+            {0em} % Spacing before the text
+            {}  % After the section
+            [\titlerule] % horizontal line
+\titleformat{\subsection}
+            {\bfseries\large} % Formatting of the text
+            {}  % Before the text
+            {0em} % Spacing before the text
+            {}  % After the section
+\titleformat{\subsubsection} %runin makes it so it spaces on the same line
+            {\bfseries} % Formatting of the text
+            {}  % Before the text
+            {0em} % Spacing before the text
+            {}  % After the section
+            []   % adds a little space
+            
+\titlespacing{\section}
+    {0em}
+    {.2em}
+    {.4em}
+    
+\titlespacing{\subsection}
+    {0em}
+    {0em}
+    {0em}            
+\titlespacing{\subsubsection}
+    {0em}  % Left Margin
+    {.25em}  % Space before 
+    {0em}  % Space afterwards
+% =====================================================
+
+% ==========================
+% Creates the subtitle for
+% positions where you can
+% put intern, etc.
+% ==========================
+\newcommand{\positiontitle}[1]
+        {
+            \hspace{-1.8em}
+            \textit{#1}
+        }
+
+% ====================
+% Generates the full
+% formatting for adding
+% a position to your 
+% resume
+% ====================
+\newcommand{\makeposition}[4]
+    {
+        \subsection{#1 \hfill {\normalsize #3}}
+        \positiontitle{#2 \hfill {\normalsize #4}}    
+    }
+
+
+% ============================
+% Generates the education layout
+% ============================
+
+    
+\newcommand{\contentitem}
+    {
+        \item\small
+    }
+    
+\newcommand{\onelinecontent}[2]
+    {
+        \small\textbf{#1} & #2
+    }
+    
+\newcommand{\skac}[4]
+{
+    \begin{flushleft}
+     \begin{tabularx}{\linewidth}{
+        >{\hsize=.525\hsize}X% 10% of 4\hsize 
+        >{\hsize=1.475\hsize}X% 30% of 4\hsize
+        >{\hsize=.4\hsize}X% 10% of 4\hsize 
+        >{\hsize=1.6\hsize}X% 30% of 4\hsize
+           % sum=4.0\hsize for 4 columns
+      }
+        #1  &   #2 \\
+      \end{tabularx}
+     \begin{tabularx}{\linewidth}{
+        >{\hsize=.25\hsize}X% 10% of 4\hsize 
+        >{\hsize=1.75\hsize}X% 30% of 4\hsize
+           % sum=4.0\hsize for 4 columns
+      }
+        #3  \\
+        #4  \\
+      \end{tabularx}
+       \end{flushleft}
+
+}
+
+% ===================================
+% Resume Header Area 
+% ===================================
+\renewcommand{\maketitle} %changing the command maketitle
+        {
+            \begin{center}
+                {\huge\bfseries\theauthor}\\
+                \vspace{.25em}
+                \VAR{meta.email} $\bullet$ \VAR{meta.phone} $\bullet$ \VAR{meta.address}
+            \end{center}
+            \vspace{-.7em}
+            \titlerule[2pt]
+        }
+
+% ===========================================
+
+
+\begin{document}
+    \title{Resume}
+    \author{\VAR{meta.name}}
+    \maketitle
+    \thispagestyle{empty}
+
+    \BLOCK{ for section in content }
+        %% set current_section = content[section].content
+        \section{\VAR{section}}
+        \BLOCK{ if content[section].get("type") == None }
+            \BLOCK{ for entry in current_section}
+                %% set current_entry = current_section[entry]
+                \makeposition{\VAR{entry}}{\VAR{current_entry.description}}{\VAR{current_entry.location}}{\VAR{current_entry.date}}
+                \begin{itemize}
+                    \BLOCK{ for content in current_entry.content }
+                        \contentitem \VAR{tex_escape(content)}
+                    \BLOCK{ endfor }
+                \end{itemize}
+            \BLOCK{ endfor }
+        \BLOCK{ elif content[section].type == "one-line-section" }
+            %% set current_section = template_code.parse_one_line_section(current_section)
+            \begin{flushleft}
+                \BLOCK{for entry in current_section}
+                    %% set current_entry = current_section[entry]
+                    \BLOCK{ if current_entry["type"] == "half" }
+                        \begin{tabularx}{\linewidth}{
+                        >{\hsize=.525\hsize}X% 10% of 4\hsize 
+                        >{\hsize=1.475\hsize}X% 30% of 4\hsize
+                        >{\hsize=.4\hsize}X% 10% of 4\hsize 
+                        >{\hsize=1.6\hsize}X% 30% of 4\hsize
+                            % sum=4.0\hsize for 4 columns
+                        }
+                        \onelinecontent{\VAR{tex_escape(entry)}}{\VAR{tex_escape(current_entry["content"])}}  &   \onelinecontent{\VAR{tex_escape(current_entry["title2"])}}{\VAR{tex_escape(current_entry["content2"])}} \\
+                        \end{tabularx}
+                    \BLOCK{ elif current_entry["type"] == "full" }
+                        \begin{tabularx}{\linewidth}{
+                            >{\hsize=.25\hsize}X% 10% of 4\hsize 
+                            >{\hsize=1.75\hsize}X% 30% of 4\hsize
+                                % sum=4.0\hsize for 4 columns
+                            }
+                            \onelinecontent{\VAR{tex_escape(entry)}}{\VAR{tex_escape(current_entry["content"])}} \\
+                        \end{tabularx}
+                    \BLOCK{ endif }
+                \BLOCK{ endfor }
+
+
+            \end{flushleft}
+        \BLOCK{ elif content[section].type == "education" }
+            \BLOCK{ for college in current_section }
+                \subsubsection{\VAR{college} \hfill {\normalsize \VAR{current_section[college].location}}}
+                \subsubsection{\VAR{current_section[college].college} \hfill {\normalsize \textnormal{Expected Graduation: \VAR{current_section[college].graduation}}}}
+                \noindent\ignorespaces
+                \textit{\VAR{current_section[college].degree[0]} \hfill {\normalsize \textnormal{GPA: \VAR{current_section[college].gpa}}}}
+                \BLOCK{ for degree in current_section[college].degree[1:]}
+                    \newline
+                    \textit{\VAR{degree}}
+                \BLOCK{ endfor }
+            \BLOCK{ endfor }
+        \BLOCK{ endif }
+    \BLOCK{ endfor }
+\end{document}

@@ -1,4 +1,8 @@
 {
   "name": "Resume Builder",
-  "dockerFile": "Dockerfile",
+"dockerFile": "Dockerfile",
+"extensions": [
+	"ms-python.python",
+	"james-yu.latex-workshop"
+],
 }
