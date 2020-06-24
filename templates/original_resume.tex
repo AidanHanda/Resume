@@ -8,7 +8,66 @@
 \usepackage{multicol} % in the preamble
 \usepackage{tabularx}
 \usepackage{array}
+\usepackage{tikz,tikzpagenodes}
+\usetikzlibrary{calc}
+\usepackage{refcount}
 \setlist[itemize]{topsep=0pt,itemsep=0pt,parsep=0pt,partopsep=0pt}
+
+% =============================
+% Creating a lined item section
+% =============================
+
+\newcounter{linedlist} % new counter for amount of lists
+\newcounter{linedcount}[linedlist] % create new item counter
+\newcounter{linedtmp}[linedlist] % tmp counter needed for checking before/after current item
+
+\newcommand{\drawoptionsconn}{gray, shorten <= .5mm, shorten >= .5mm, thick}
+\newcommand{\drawoptionsshort}{gray, shorten <= .5mm, shorten >= -1mm, thick}
+
+\newcommand{\lineditem}{% Modified `\item` to update counter and save nodes
+  \small
+  \stepcounter{linedcount}%
+  \item[\linkedlist{%
+    i\alph{linedlist}\arabic{linedcount}}]%
+  \label{item-\alph{linedlist}\arabic{linedcount}}%
+  \ifnum\value{linedcount}>1%
+    \ifnum\getpagerefnumber{item-\alph{linedlist}\arabic{linedtmp}}<\getpagerefnumber{item-\alph{linedlist}\arabic{linedcount}}%
+      \begin{tikzpicture}[remember picture,overlay]%
+        \expandafter\draw\expandafter[\drawoptionsshort] (i\alph{linedlist}\arabic{linedcount}) --
+          ++(0,3mm) --
+          (i\alph{linedlist}\arabic{linedcount} |- current page text area.north);% draw short line
+      \end{tikzpicture}%
+    \else%
+      \begin{tikzpicture}[remember picture,overlay]%
+        \expandafter\draw\expandafter[\drawoptionsconn] (i\alph{linedlist}\arabic{linedtmp}) -- (i\alph{linedlist}\arabic{linedcount});% draw the connecting lines
+      \end{tikzpicture}%
+    \fi%
+  \fi%
+  \addtocounter{linedtmp}{2}%
+  \IfRefUndefinedExpandable{item-\alph{linedlist}\arabic{linedtmp}}{}{% defined
+    \ifnum\getpagerefnumber{item-\alph{linedlist}\arabic{linedtmp}}>\getpagerefnumber{item-\alph{linedlist}\arabic{linedcount}}%
+      \begin{tikzpicture}[remember picture,overlay]%
+      \expandafter\draw\expandafter[\drawoptionsshort] (i\alph{linedlist}\arabic{linedcount}) --
+        ++(0,-3mm) --
+        (i\alph{linedlist}\arabic{linedcount} |- current page text area.south);% draw short line
+      \end{tikzpicture}%
+    \fi%
+  }%
+  \addtocounter{linedtmp}{-1}%
+}
+
+\newcommand{\linkedlist}[1]{
+  \raisebox{0pt}[0pt][0pt]{\begin{tikzpicture}[remember picture]%
+  \node (#1) [gray,circle,fill,inner sep=1.5pt]{};
+  \end{tikzpicture}}%
+}
+
+\newenvironment{lineditemize}{%
+% Create new `lineditemize` environment to keep track of the counters
+  \stepcounter{linedlist}% increment list counter
+  \begin{itemize}[leftmargin=*]
+}{\end{itemize}%
+  }
 
 % =================================
 % Formatting various headings 
@@ -64,10 +123,13 @@
 % a position to your 
 % resume
 % ====================
-\newcommand{\makeposition}[4]
+\newcommand{\makepositionheader}[2]
     {
-        \subsection{#1 \hfill {\normalsize #3}}
-        \positiontitle{#2 \hfill {\normalsize #4}}    
+        \subsection{#1 \hfill {\normalsize #2}}
+    }
+\newcommand{\makepositiondesc}[2]
+    {
+        \positiontitle{#1 \hfill {\normalsize #2}}    
     }
 
 
@@ -139,12 +201,17 @@
         \BLOCK{ if content[section].get("type") == None }
             \BLOCK{ for entry in current_section}
                 %% set current_entry = current_section[entry]
-                \makeposition{\VAR{entry}}{\VAR{current_entry.description}}{\VAR{current_entry.location}}{\VAR{current_entry.date}}
-                \begin{itemize}
-                    \BLOCK{ for content in current_entry.content }
-                        \contentitem \VAR{tex_escape(content)}
-                    \BLOCK{ endfor }
-                \end{itemize}
+                \makepositionheader{\VAR{entry}}{\VAR{current_entry.location}}
+                \BLOCK{ if current_entry.get("lined") == None }
+                    \makepositiondesc{\VAR{tex_escape(current_entry.description)}}{\VAR{current_entry.date}}
+                    \begin{itemize}
+                        \BLOCK{ for content in current_entry.content }
+                            \contentitem \VAR{tex_escape(content)}
+                        \BLOCK{ endfor }
+                    \end{itemize}
+                \BLOCK{ else }
+                    
+                \BLOCK{ endif }
             \BLOCK{ endfor }
         \BLOCK{ elif content[section].type == "one-line-section" }
             %% set current_section = template_code.parse_one_line_section(current_section)
