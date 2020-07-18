@@ -1,2 +1,10 @@
+
+# Mac
+.DS_Store
+
+# Resumes
 *.yaml
 *.yml
+
+# Output from commands
+compiled/
