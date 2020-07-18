@@ -5,7 +5,7 @@ build: *.yaml
 
 *.yaml: 
 	@echo "Compiling: $@"
-	@docker run -v "$(shell pwd):/input" resme:latest -i /input/$@ > $(basename $@).tex
+	@docker run -v "$(shell pwd):/input" aidanhanda/resme:latest -i /input/$@ > $(basename $@).tex
 
 clean:
 	rm -f *.tex
