@@ -1,6 +1,8 @@
-FROM python:3-alpine as code
+FROM python:3
 
-RUN apk add --no-cache texlive-full
+USER root
+
+#RUN apt-get update && apt-get install -y texlive-latex-recommended
 
 WORKDIR /resme/temp
 COPY ./requirements.txt requirements.txt
@@ -10,8 +12,6 @@ WORKDIR /app/
 COPY ./src ./src
 COPY ./templates ./templates
 
-USER root
-
-ENTRYPOINT ["/bin/ash"]
-#ENTRYPOINT ["python","src/resme.py"]
+#ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["python","src/resme.py"]
 

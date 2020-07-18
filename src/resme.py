@@ -19,11 +19,8 @@ def process(content:str, out_file:str):
     resume_content = load_yaml_dictionary(content)
     template_context = load_template_context() # This is here for expandability later on
 
-    temp = str(uuid.uuid1())
-    with open(f"{temp}.tex","w") as f:
-        f.write(template_context.render(resume_content))
+    print(template_context.render(resume_content))
 
-    subprocess.call(["latex",f"{temp}.tex","-o",out_file])
 
 def load_yaml_dictionary(content: str) -> dict:
     """
