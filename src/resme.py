@@ -1,10 +1,12 @@
 import click
+import subprocess
 import yaml
 import sys
 import pathlib
 from jinja2 import Template, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound
 import re
+import uuid
 from template_code.original_resume import original_resume
 
 @click.command()
@@ -17,7 +19,11 @@ def process(content:str, out_file:str):
     resume_content = load_yaml_dictionary(content)
     template_context = load_template_context() # This is here for expandability later on
 
-    print(template_context.render(resume_content))
+    temp = str(uuid.uuid1())
+    with open(f"{temp}.tex","w") as f:
+        f.write(template_context.render(resume_content))
+
+    subprocess.call(["latex",f"{temp}.tex","-o",out_file])
 
 def load_yaml_dictionary(content: str) -> dict:
     """
@@ -29,7 +35,7 @@ def load_yaml_dictionary(content: str) -> dict:
             resume_content = yaml.safe_load(content_file)
     except FileNotFoundError:
         sys.exit("Your content file could not be found!")
-    
+
     return resume_content
 
 def load_template_context(template="{}/templates/original_resume.tex".format(pathlib.Path(__file__).parent.parent.absolute())):
@@ -48,7 +54,7 @@ def load_template_context(template="{}/templates/original_resume.tex".format(pat
         line_comment_prefix="%#",
         trim_blocks=True,
         autoescape=False,
-        loader = FileSystemLoader(pathlib.Path(".")) 
+        loader = FileSystemLoader(pathlib.Path("."))
     )
     latex_env.globals['tex_escape'] = tex_escape
     instantiate_template_code(latex_env)
@@ -84,7 +90,7 @@ def tex_escape(text):
 
 def instantiate_template_code(environ: Environment):
     """
-    Passes the custom code model for the template into 
+    Passes the custom code model for the template into
     the context for the template
     """
     # hard coded for now - just for simplicy
