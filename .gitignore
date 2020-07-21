@@ -6,5 +6,5 @@
 *.yaml
 *.yml
 
-# Output from commands
-compiled/
+# Compiled
+*.pdf
