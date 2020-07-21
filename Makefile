@@ -16,7 +16,7 @@ ifeq ($(XELATEX),)
 else
 	@echo "Creating TEMPDIR: $(TEMPDIR)"
 	@mkdir "$(TEMPDIR)"
-	@$(TEXBUILDCMD) > $(TEMPDIR)/$(basename @a).tex
+	@$(TEXBUILDCMD) > $(TEMPDIR)/$(basename $@).tex
 	-@cd $(TEMPDIR); xelatex -interaction=batchmode $(basename $@).tex > $(basename $a).xelatex.log
 	@mv $(TEMPDIR)/$(basename $@).pdf $(basename $@).pdf
 	@echo "Removing temp directory: $(TEMPDIR)"
